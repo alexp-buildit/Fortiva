@@ -1,5 +1,6 @@
 import { CheckCircle2, Lock, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { ReactNode } from "react";
 
 export default function AppPlaceholder() {
   return (
@@ -32,8 +33,6 @@ export default function AppPlaceholder() {
     </section>
   );
 }
-
-import type { ReactNode } from "react";
 
 function Feature({ icon, title }: { icon: ReactNode; title: string }) {
   return (
