@@ -12,7 +12,9 @@ export default function Layout({ children }: PropsWithChildren) {
         Skip to content
       </a>
       <Header />
-      <main id="main-content" className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">
+        {children}
+      </main>
       <Footer />
     </div>
   );

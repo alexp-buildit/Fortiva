@@ -9,14 +9,20 @@ export default function AppPlaceholder() {
           <ShieldCheck className="h-4 w-4 text-primary" aria-hidden="true" />
           <span>Secure workspace</span>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Your Fortiva dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+          Your Fortiva dashboard
+        </h1>
         <p className="mt-3 text-muted-foreground">
-          This is a placeholder route. Connect Supabase and Builder.io auth to enable the full transaction dashboard, MFA, and secure messaging.
+          This is a placeholder route. Connect Supabase and Builder.io auth to
+          enable the full transaction dashboard, MFA, and secure messaging.
         </p>
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           <Feature icon={<Lock className="h-5 w-5" />} title="MFA required" />
           <Feature icon={<ShieldCheck className="h-5 w-5" />} title="TLS 1.3" />
-          <Feature icon={<CheckCircle2 className="h-5 w-5" />} title="Audit logging" />
+          <Feature
+            icon={<CheckCircle2 className="h-5 w-5" />}
+            title="Audit logging"
+          />
         </div>
         <div className="mt-8 flex items-center justify-center gap-3">
           <Button>Create transaction</Button>

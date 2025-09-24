@@ -35,7 +35,9 @@ export default function Index() {
       <Features />
       <Compliance />
       <Support />
-      <section aria-hidden className="sr-only">{exampleFromServer}</section>
+      <section aria-hidden className="sr-only">
+        {exampleFromServer}
+      </section>
     </div>
   );
 }
@@ -94,38 +96,32 @@ function Features() {
     {
       icon: <Lock className="h-5 w-5" />,
       title: "Authenticated access",
-      desc:
-        "MFA on account access and when viewing or changing wire instructions.",
+      desc: "MFA on account access and when viewing or changing wire instructions.",
     },
     {
       icon: <LinkIcon className="h-5 w-5" />,
       title: "Time-limited secure links",
-      desc:
-        "Encrypted URLs that expire automatically with transaction context.",
+      desc: "Encrypted URLs that expire automatically with transaction context.",
     },
     {
       icon: <FileSignature className="h-5 w-5" />,
       title: "Tamper-evident instructions",
-      desc:
-        "Integrity checksums and periodic verification on stored banking data.",
+      desc: "Integrity checksums and periodic verification on stored banking data.",
     },
     {
       icon: <Download className="h-5 w-5" />,
       title: "Download receipts",
-      desc:
-        "Automatic logging and notifications when senders download instructions.",
+      desc: "Automatic logging and notifications when senders download instructions.",
     },
     {
       icon: <MessageSquareLock className="h-5 w-5" />,
       title: "Secure messaging",
-      desc:
-        "Transaction-scoped messaging with real-time delivery and audit trail.",
+      desc: "Transaction-scoped messaging with real-time delivery and audit trail.",
     },
     {
       icon: <Fingerprint className="h-5 w-5" />,
       title: "Role-based workspaces",
-      desc:
-        "Clear interfaces for Admins, Senders, and Receivers with proper permissions.",
+      desc: "Clear interfaces for Admins, Senders, and Receivers with proper permissions.",
     },
   ];
 
@@ -136,8 +132,8 @@ function Features() {
           Built for high-stakes transactions
         </h2>
         <p className="mt-3 text-muted-foreground">
-          Fortiva combines strong encryption, access control, and compliance-first
-          workflows to prevent wire fraud and simplify audits.
+          Fortiva combines strong encryption, access control, and
+          compliance-first workflows to prevent wire fraud and simplify audits.
         </p>
       </div>
       <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -159,7 +155,9 @@ function Features() {
       <div className="mt-10 rounded-lg border bg-secondary/40 p-6 text-secondary-foreground">
         <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h3 className="text-lg font-semibold">Ready to see it in action?</h3>
+            <h3 className="text-lg font-semibold">
+              Ready to see it in action?
+            </h3>
             <p className="text-sm text-muted-foreground">
               Launch the secure workspace and explore the dashboard placeholder.
             </p>
@@ -189,15 +187,20 @@ function Compliance() {
     <section id="compliance" className="bg-muted/30 py-16 sm:py-24">
       <div className="container">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Compliance & Security</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Compliance & Security
+          </h2>
           <p className="mt-3 text-muted-foreground">
-            Enterprise-grade controls to meet stringent regulatory requirements while
-            keeping your team productive.
+            Enterprise-grade controls to meet stringent regulatory requirements
+            while keeping your team productive.
           </p>
         </div>
         <ul className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((i) => (
-            <li key={i.title} className="flex items-center gap-2 rounded-lg border bg-card p-3 text-card-foreground">
+            <li
+              key={i.title}
+              className="flex items-center gap-2 rounded-lg border bg-card p-3 text-card-foreground"
+            >
               <TimerReset className="h-4 w-4 text-primary" aria-hidden />
               <span className="text-sm">{i.title}</span>
             </li>
@@ -213,21 +216,37 @@ function Support() {
     <section id="support" className="container py-16 sm:py-24">
       <div className="mx-auto grid max-w-5xl grid-cols-1 gap-8 lg:grid-cols-2">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">We’re here to help</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            We’re here to help
+          </h2>
           <p className="mt-3 text-muted-foreground">
-            Have questions, need a demo, or want help setting up Supabase and MFA? Our
-            team will guide you through best practices to eliminate wire fraud risk.
+            Have questions, need a demo, or want help setting up Supabase and
+            MFA? Our team will guide you through best practices to eliminate
+            wire fraud risk.
           </p>
           <div className="mt-6 space-y-2 text-sm">
-            <p><span className="font-medium">Email:</span> support@fortiva.example</p>
-            <p><span className="font-medium">Hours:</span> Mon–Fri, 8am–6pm MT</p>
-            <p className="text-muted-foreground">For expired secure links, contact support to reissue access.</p>
+            <p>
+              <span className="font-medium">Email:</span>{" "}
+              support@fortiva.example
+            </p>
+            <p>
+              <span className="font-medium">Hours:</span> Mon–Fri, 8am–6pm MT
+            </p>
+            <p className="text-muted-foreground">
+              For expired secure links, contact support to reissue access.
+            </p>
           </div>
         </div>
         <div className="rounded-xl border bg-card p-6 text-card-foreground shadow-sm">
           <h3 className="text-lg font-semibold">Request a demo</h3>
-          <p className="mt-1 text-sm text-muted-foreground">We’ll reach out shortly to coordinate.</p>
-          <form className="mt-4 grid gap-3" onSubmit={(e) => e.preventDefault()} aria-label="Demo request form">
+          <p className="mt-1 text-sm text-muted-foreground">
+            We’ll reach out shortly to coordinate.
+          </p>
+          <form
+            className="mt-4 grid gap-3"
+            onSubmit={(e) => e.preventDefault()}
+            aria-label="Demo request form"
+          >
             <label className="grid gap-1">
               <span className="text-sm font-medium">Work email</span>
               <input
@@ -253,8 +272,12 @@ function Support() {
                 <option>Compliance</option>
               </select>
             </label>
-            <Button type="submit" className="mt-2">Submit</Button>
-            <p className="text-xs text-muted-foreground">Submitting the form is a visual demo only.</p>
+            <Button type="submit" className="mt-2">
+              Submit
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Submitting the form is a visual demo only.
+            </p>
           </form>
         </div>
       </div>

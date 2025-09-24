@@ -5,10 +5,12 @@ This checklist guides Claude Code in VS Code to take the boilerplate to a fully 
 ---
 
 ## 0) Prerequisites
+
 - Accounts: Supabase, Twilio (or other SMS), SendGrid/Resend (email), Netlify or Vercel, UptimeRobot, Sentry (optional).
 - Tools: pnpm ≥ 8, Node ≥ 18, OpenSSL (or native crypto), Git.
 
 ## 1) Install dependencies
+
 ```bash
 pnpm add @supabase/supabase-js jose zod
 pnpm add express-rate-limit helmet cors nanoid
@@ -16,12 +18,15 @@ pnpm add -D @supabase/ssr
 ```
 
 ## 2) Supabase project
+
 1. Create a new project. Copy the Project URL and anon/service keys.
 2. Enable Email + SMS; set up Twilio for SMS MFA; configure DKIM for email provider.
 3. In Authentication → Policies, enable MFA (TOTP/SMS) and password policy: min 12 chars, mixed case, numbers, symbols.
 
 ## 3) Database schema (SQL)
+
 Run the following in the Supabase SQL editor (adjust schemas if needed):
+
 ```sql
 -- enable extensions
 create extension if not exists pgcrypto;
@@ -166,7 +171,9 @@ create table if not exists system_health_logs (
 ```
 
 ## 4) RLS and policies
+
 Enable RLS on all tables, then add policies:
+
 ```sql
 alter table users enable row level security;
 alter table transactions enable row level security;
@@ -181,7 +188,9 @@ alter table activity_logs enable row level security;
 alter table backup_logs enable row level security;
 alter table system_health_logs enable row level security;
 ```
+
 Policies (examples — adjust to your org):
+
 ```sql
 -- users: self access
 create policy "users_select_self" on users for select using (auth.uid() = id);
@@ -222,29 +231,40 @@ create policy "msg_insert_sender" on messages for insert with check (sender_id =
 ```
 
 ## 5) Storage
+
 - Create private bucket `documents` with versioning.
 - Use signed URLs for downloads; enforce recipient membership check before issuing URLs.
 
 ## 6) Edge Functions (Deno)
+
 Create functions in Supabase:
+
 - `secure-link-create`: input {transaction_id, link_type, recipient_email}; generate token (nanoid), set `expires_at = now() + interval '7 days'`, insert into `secure_links`, send email/SMS with URL.
 - `secure-link-validate`: input {token, transaction_id}; verify expiration and that `transaction_id` matches; return minimal context.
 - `backup-snapshot`: run `pg_dump` (via scheduled job) to storage; write checksum to `backup_logs`.
 
 Minimal skeleton (TypeScript):
+
 ```ts
 import { serve } from "https://deno.land/std/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
 import { nanoid } from "https://esm.sh/nanoid";
 serve(async (req) => {
-  const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+  const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
   // implement handler per route here
-  return new Response(JSON.stringify({ ok: true }), { headers: { 'content-type': 'application/json' } });
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: { "content-type": "application/json" },
+  });
 });
 ```
 
 ## 7) Secrets and environment
+
 Create `.env` (local) and set in hosting provider:
+
 ```
 VITE_SUPABASE_URL=...
 VITE_SUPABASE_ANON_KEY=...
@@ -256,9 +276,11 @@ TWILIO_SID=...
 TWILIO_TOKEN=...
 TWILIO_FROM=...
 ```
+
 Generate 32-byte key: `openssl rand -base64 32`.
 
 ## 8) Server implementation (Express)
+
 1. Create `server/lib/crypto.ts` with AES-256-GCM helpers (`encrypt(text): {ciphertext, iv, tag}`, `decrypt(...)`, and `sha256(data)` for integrity checksums).
 2. Add Supabase service client in `server/index.ts`.
 3. Endpoints:
@@ -270,6 +292,7 @@ Generate 32-byte key: `openssl rand -base64 32`.
 4. Middleware: `helmet`, `cors`, `express-rate-limit` (per-IP login + link validate), session timeout headers.
 
 ## 9) Frontend implementation
+
 1. Create Supabase client `client/lib/supabase.ts` using `VITE_*` vars.
 2. Auth pages: Register → MFA verify (email + SMS/TOTP), Login, Password reset.
 3. Role selection: Admin/Sender/Receiver; write to `users` table. Admin requests require `admin_approved=true` by owner UI.
@@ -282,6 +305,7 @@ Generate 32-byte key: `openssl rand -base64 32`.
 7. Accessibility: WCAG 2.1 AA — labels, roles, focus ring, tab order, min contrast.
 
 ## 10) Compliance & security hardening
+
 - TLS end-to-end (host enforces HTTPS).
 - CSP headers, Referrer-Policy, HSTS via hosting config.
 - Progressive account lockouts on auth forms (track attempts server-side).
@@ -289,12 +313,15 @@ Generate 32-byte key: `openssl rand -base64 32`.
 - Session timeout: Admin 8h, others 4h; refresh on activity.
 
 ## 11) Monitoring & backups
+
 - UptimeRobot monitor public site and API ping.
 - Sentry (optional) for FE/BE error tracking.
 - Nightly backup via `backup-snapshot`; verify checksums; write `backup_logs`.
 
 ## 12) Deployment
+
 ### Netlify (recommended with this repo)
+
 1. Connect repo → set build command `pnpm build` and publish directory `dist/spa`.
 2. Environment: set all vars from section 7. Add functions env too.
 3. Ensure `netlify/functions/` functions are built (adapt server endpoints or proxy to Supabase Edge Functions).
@@ -302,11 +329,13 @@ Generate 32-byte key: `openssl rand -base64 32`.
    - `_redirects`: `/*    /index.html   200`.
 
 ### Vercel
+
 1. Create project → Framework: Vite + Node SSR functions.
 2. Add `api/*` serverless functions for endpoints or proxy to Supabase Edge Functions.
 3. Set env vars; build command `pnpm build`; output `dist`.
 
 ## 13) Go-live checklist
+
 - [ ] All tests pass; typecheck clean.
 - [ ] RLS enabled on all tables; service-role only tables locked down.
 - [ ] MFA enforced for auth and sensitive actions.
