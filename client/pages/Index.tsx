@@ -66,10 +66,10 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
-              <Link to="/app">Get started</Link>
+              <Link to="/signup">Get started</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="/#support">Request a demo</a>
+              <a href="#support">Request a demo</a>
             </Button>
           </div>
           <ul className="mx-auto mt-6 flex max-w-xl flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
@@ -164,7 +164,7 @@ function Features() {
             </p>
           </div>
           <Button asChild>
-            <Link to="/app">Open workspace</Link>
+            <Link to="/dashboard">Open workspace</Link>
           </Button>
         </div>
       </div>
