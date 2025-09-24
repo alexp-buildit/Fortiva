@@ -66,7 +66,7 @@ function Hero() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Button asChild size="lg">
-              <a href="/app">Get started</a>
+              <Link to="/app">Get started</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
               <a href="/#support">Request a demo</a>
@@ -164,7 +164,7 @@ function Features() {
             </p>
           </div>
           <Button asChild>
-            <a href="/app">Open workspace</a>
+            <Link to="/app">Open workspace</Link>
           </Button>
         </div>
       </div>
