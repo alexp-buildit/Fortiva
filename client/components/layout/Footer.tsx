@@ -14,13 +14,13 @@ export default function Footer() {
               Support
             </a>
             <a
-              href="#"
+              href="/privacy"
               className="text-sm text-foreground/80 hover:text-foreground"
             >
               Privacy
             </a>
             <a
-              href="#"
+              href="/terms"
               className="text-sm text-foreground/80 hover:text-foreground"
             >
               Terms
