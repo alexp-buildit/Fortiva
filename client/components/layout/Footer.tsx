@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Footer() {
   return (
     <footer className="border-t bg-background">
@@ -7,24 +9,24 @@ export default function Footer() {
             © {new Date().getFullYear()} Fortiva, Inc. All rights reserved.
           </p>
           <nav className="flex items-center gap-6" aria-label="Footer">
-            <a
-              href="/#support"
+            <Link
+              to="/#support"
               className="text-sm text-foreground/80 hover:text-foreground"
             >
               Support
-            </a>
-            <a
-              href="/privacy"
+            </Link>
+            <Link
+              to="/privacy"
               className="text-sm text-foreground/80 hover:text-foreground"
             >
               Privacy
-            </a>
-            <a
-              href="/terms"
+            </Link>
+            <Link
+              to="/terms"
               className="text-sm text-foreground/80 hover:text-foreground"
             >
               Terms
-            </a>
+            </Link>
           </nav>
         </div>
       </div>
