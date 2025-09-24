@@ -32,4 +32,8 @@ const App = () => (
   </QueryClientProvider>
 );
 
-createRoot(document.getElementById("root")!).render(<App />);
+const _container = document.getElementById("root")!;
+if (!(window as any).__FORTIVA_ROOT) {
+  (window as any).__FORTIVA_ROOT = createRoot(_container);
+}
+(window as any).__FORTIVA_ROOT.render(<App />);
