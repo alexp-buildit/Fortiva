@@ -33,7 +33,9 @@ export default function AppPlaceholder() {
   );
 }
 
-function Feature({ icon, title }: { icon: React.ReactNode; title: string }) {
+import type { ReactNode } from "react";
+
+function Feature({ icon, title }: { icon: ReactNode; title: string }) {
   return (
     <div className="rounded-lg border bg-card p-4 text-card-foreground">
       <div className="flex items-center gap-2">
