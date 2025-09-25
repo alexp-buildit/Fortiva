@@ -21,8 +21,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Test the connection (using a simple query that doesn't need RLS)
-console.log('🔄 Testing Supabase connection...');
+// Supabase client is ready for use
 
 export type Database = {
   public: {

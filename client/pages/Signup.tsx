@@ -29,8 +29,20 @@ export default function Signup() {
     setError('');
     setLoading(true);
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Enhanced password validation
+    if (password.length < 12) {
+      setError('Password must be at least 12 characters long');
+      setLoading(false);
+      return;
+    }
+
+    const hasLowercase = /[a-z]/.test(password);
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password);
+
+    if (!hasLowercase || !hasUppercase || !hasNumbers || !hasSpecialChar) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
       setLoading(false);
       return;
     }
@@ -194,7 +206,7 @@ export default function Signup() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Minimum 6 characters"
+                  placeholder="12+ characters with uppercase, lowercase, number & special character"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
