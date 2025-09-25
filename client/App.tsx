@@ -16,6 +16,9 @@ import Dashboard from "./pages/Dashboard";
 import Layout from "./components/layout/Layout";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import WireInstructions from "./pages/WireInstructions";
+import Transactions from "./pages/Transactions";
+import DemoRequest from "./pages/DemoRequest";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,10 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/wire-instructions" element={<WireInstructions />} />
+              <Route path="/wire-instructions/:transactionId" element={<WireInstructions />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/demo" element={<DemoRequest />} />
               <Route path="/app" element={<AppPlaceholder />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />

@@ -44,12 +44,11 @@ export default function Signup() {
     });
 
     if (error) {
+      console.error('Signup error details:', error);
       setError(error.message);
     } else {
       setSuccess(true);
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+      // Don't redirect immediately, let user read the message
     }
 
     setLoading(false);

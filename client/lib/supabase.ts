@@ -3,9 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-console.log('🔧 DEBUG: Supabase URL:', supabaseUrl);
-console.log('🔧 DEBUG: Supabase Key exists:', !!supabaseAnonKey);
-console.log('🔧 DEBUG: Key length:', supabaseAnonKey?.length);
+// Validate environment variables
+if (!supabaseUrl?.includes('wgqihgtcokgmrombniko')) {
+  throw new Error('Supabase URL mismatch - check your project URL');
+}
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error('❌ Missing env vars:', { supabaseUrl, supabaseAnonKey });

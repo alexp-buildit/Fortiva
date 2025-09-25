@@ -69,7 +69,7 @@ function Hero() {
               <Link to="/signup">Get started</Link>
             </Button>
             <Button asChild size="lg" variant="outline">
-              <a href="#support">Request a demo</a>
+              <Link to="/demo">Request a demo</Link>
             </Button>
           </div>
           <ul className="mx-auto mt-6 flex max-w-xl flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">

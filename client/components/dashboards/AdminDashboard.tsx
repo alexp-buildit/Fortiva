@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +14,8 @@ import {
   Settings,
   LogOut,
   PlusCircle,
-  Eye
+  Eye,
+  FileCheck
 } from 'lucide-react';
 
 export function AdminDashboard() {
@@ -128,7 +130,7 @@ export function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -140,8 +142,10 @@ export function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full">
-              Create New Transaction
+            <Button asChild className="w-full">
+              <Link to="/transactions">
+                Create New Transaction
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -179,8 +183,29 @@ export function AdminDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full">
-              View All Transactions
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/transactions">
+                View All Transactions
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileCheck className="h-5 w-5" />
+              Wire Instructions
+            </CardTitle>
+            <CardDescription>
+              Review and manage all wire transfer instructions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline" className="w-full">
+              <Link to="/wire-instructions">
+                Manage Wire Instructions
+              </Link>
             </Button>
           </CardContent>
         </Card>

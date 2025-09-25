@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -140,8 +141,10 @@ export function ReceiverDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full">
-              Add Banking Information
+            <Button asChild className="w-full">
+              <Link to="/wire-instructions">
+                Add Banking Information
+              </Link>
             </Button>
           </CardContent>
         </Card>
