@@ -18,6 +18,8 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import WireInstructions from "./pages/WireInstructions";
 import Transactions from "./pages/Transactions";
+import TransactionDetail from "./pages/TransactionDetail";
+import TransactionEdit from "./pages/TransactionEdit";
 import DemoRequest from "./pages/DemoRequest";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,8 @@ const App = () => (
               <Route path="/wire-instructions" element={<WireInstructions />} />
               <Route path="/wire-instructions/:transactionId" element={<WireInstructions />} />
               <Route path="/transactions" element={<Transactions />} />
+              <Route path="/transactions/:id" element={<TransactionDetail />} />
+              <Route path="/transactions/:id/edit" element={<TransactionEdit />} />
               <Route path="/demo" element={<DemoRequest />} />
               <Route path="/app" element={<AppPlaceholder />} />
               <Route path="/privacy" element={<Privacy />} />
