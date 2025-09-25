@@ -3,13 +3,22 @@
   functions = "netlify/functions"
   publish = "dist/spa"
 
+[build.environment]
+  NODE_VERSION = "18"
+  VITE_SUPABASE_URL = "https://wgqihgtcokgmrombniko.supabase.co"
+  VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndncWloZ3Rjb2tnbXJvbWJuaWtvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3MjA1NDIsImV4cCI6MjA3NDI5NjU0Mn0.cEbAijiPiUNCKnMwKp84mHG7qi-ZqM_E4il3cB7rcNg"
 
 [functions]
   external_node_modules = ["express"]
   node_bundler = "esbuild"
-  
+
 [[redirects]]
   force = true
   from = "/api/*"
   status = 200
   to = "/.netlify/functions/api/:splat"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
