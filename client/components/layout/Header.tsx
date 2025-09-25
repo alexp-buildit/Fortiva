@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
+  const { user, profile, signOut } = useAuth();
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -35,12 +38,29 @@ export default function Header() {
           </a>
         </nav>
         <div className="flex items-center gap-2">
-          <Button asChild variant="ghost">
-            <Link to="/app">Sign in</Link>
-          </Button>
-          <Button asChild>
-            <Link to="/app">Get started</Link>
-          </Button>
+          {user ? (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/dashboard">
+                  <User className="h-4 w-4 mr-2" />
+                  {profile?.first_name || 'Dashboard'}
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => signOut()}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button asChild variant="ghost">
+                <Link to="/login">Sign in</Link>
+              </Button>
+              <Button asChild>
+                <Link to="/signup">Get started</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </header>
