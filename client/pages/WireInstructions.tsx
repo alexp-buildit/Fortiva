@@ -148,7 +148,10 @@ export default function WireInstructions() {
         <WireInstructionForm
           transactionId={transactionId}
           mode={formMode}
-          initialData={selectedInstruction || undefined}
+          initialData={selectedInstruction ? {
+            ...selectedInstruction,
+            verification_method: selectedInstruction.verification_method as 'phone' | 'email' | 'in_person'
+          } : undefined}
           onSubmit={(data) => {
             setShowForm(false);
             loadWireInstructions();

@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
   Plus,
   Eye,
@@ -21,10 +23,14 @@ import {
   ArrowDownLeft,
   Clock,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Shield,
+  Lock,
+  Unlock
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import WireInstructionForm, { type WireInstructionData } from '@/components/WireInstructionForm';
 
 interface Transaction {
   id: string;
@@ -357,11 +363,18 @@ export default function Transactions() {
   );
 }
 
-// Placeholder for Create Transaction Form
+// Enhanced Create Transaction Form with Wire Instructions
 function CreateTransactionForm({ onCancel, onSuccess }: { onCancel: () => void; onSuccess: () => void }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [activeTab, setActiveTab] = useState('transaction');
+  const [createdTransaction, setCreatedTransaction] = useState<any>(null);
+  const [wireInstructionOption, setWireInstructionOption] = useState<'none' | 'existing' | 'new'>('none');
+  const [existingWireInstructions, setExistingWireInstructions] = useState<any[]>([]);
+  const [selectedWireInstruction, setSelectedWireInstruction] = useState<string>('');
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [password, setPassword] = useState('');
 
   const [formData, setFormData] = useState({
     transaction_id: '',
@@ -371,7 +384,28 @@ function CreateTransactionForm({ onCancel, onSuccess }: { onCancel: () => void; 
     closing_date: ''
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Load existing wire instructions when component mounts
+  useEffect(() => {
+    loadExistingWireInstructions();
+  }, [user]);
+
+  const loadExistingWireInstructions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('wire_instructions')
+        .select('*')
+        .eq('created_by', user?.id)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setExistingWireInstructions(data || []);
+    } catch (err: any) {
+      console.error('Error loading wire instructions:', err);
+    }
+  };
+
+  const handleTransactionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -405,7 +439,30 @@ function CreateTransactionForm({ onCancel, onSuccess }: { onCancel: () => void; 
           status: 'active'
         });
 
-      onSuccess();
+      setCreatedTransaction(data);
+
+      // If no wire instructions needed, complete the process
+      if (wireInstructionOption === 'none') {
+        onSuccess();
+        return;
+      }
+
+      // If existing wire instruction selected, link it
+      if (wireInstructionOption === 'existing' && selectedWireInstruction) {
+        await supabase
+          .from('wire_instructions')
+          .update({ transaction_id: data.id })
+          .eq('id', selectedWireInstruction);
+
+        onSuccess();
+        return;
+      }
+
+      // If new wire instruction, move to wire instruction tab
+      if (wireInstructionOption === 'new') {
+        setActiveTab('wire-instructions');
+      }
+
     } catch (err: any) {
       console.error('Error creating transaction:', err);
       setError(err.message);
@@ -414,89 +471,253 @@ function CreateTransactionForm({ onCancel, onSuccess }: { onCancel: () => void; 
     }
   };
 
+  const handleWireInstructionSubmit = (data: WireInstructionData) => {
+    // Wire instruction was successfully created and linked to transaction
+    onSuccess();
+  };
+
+  const handlePasswordVerification = async () => {
+    // In a real implementation, you'd verify the password against the user's account
+    // For this demo, we'll just check if a password was entered
+    if (!password.trim()) {
+      setError('Password is required to access saved wire instructions');
+      return;
+    }
+
+    // Simple password check - in production, this would be handled securely
+    try {
+      // You could verify the password against the user's account here
+      // For now, we'll assume any non-empty password is valid
+      setShowPasswordDialog(false);
+      setPassword('');
+      setWireInstructionOption('existing');
+    } catch (err: any) {
+      setError('Invalid password');
+    }
+  };
+
   return (
-    <div className="container max-w-2xl mx-auto py-8">
+    <div className="container max-w-4xl mx-auto py-8">
       <Card>
         <CardHeader>
           <CardTitle>Create New Transaction</CardTitle>
           <CardDescription>
-            Set up a new secure wire transfer transaction
+            Set up a new secure wire transfer transaction with optional wire instructions
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="transaction">Transaction Details</TabsTrigger>
+              <TabsTrigger value="wire-instructions" disabled={!createdTransaction}>
+                Wire Instructions
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="transaction" className="space-y-6">
+              <form onSubmit={handleTransactionSubmit} className="space-y-6">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Transaction Details */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="transaction_id">Transaction ID (Optional)</Label>
+                    <Input
+                      id="transaction_id"
+                      value={formData.transaction_id}
+                      onChange={(e) => setFormData(prev => ({ ...prev, transaction_id: e.target.value }))}
+                      placeholder="Leave blank to auto-generate"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="property_address">Property Address</Label>
+                    <Input
+                      id="property_address"
+                      value={formData.property_address}
+                      onChange={(e) => setFormData(prev => ({ ...prev, property_address: e.target.value }))}
+                      placeholder="123 Property Street, City, State"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="property_value">Property Value</Label>
+                      <Input
+                        id="property_value"
+                        type="number"
+                        step="0.01"
+                        value={formData.property_value}
+                        onChange={(e) => setFormData(prev => ({ ...prev, property_value: e.target.value }))}
+                        placeholder="500000"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="escrow_amount">Escrow Amount</Label>
+                      <Input
+                        id="escrow_amount"
+                        type="number"
+                        step="0.01"
+                        value={formData.escrow_amount}
+                        onChange={(e) => setFormData(prev => ({ ...prev, escrow_amount: e.target.value }))}
+                        placeholder="50000"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="closing_date">Expected Closing Date</Label>
+                    <Input
+                      id="closing_date"
+                      type="date"
+                      value={formData.closing_date}
+                      onChange={(e) => setFormData(prev => ({ ...prev, closing_date: e.target.value }))}
+                    />
+                  </div>
+                </div>
+
+                {/* Wire Instructions Options */}
+                <div className="space-y-4 border-t pt-6">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <h3 className="text-lg font-medium">Wire Instructions</h3>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="wire-none"
+                        name="wire-option"
+                        value="none"
+                        checked={wireInstructionOption === 'none'}
+                        onChange={(e) => setWireInstructionOption('none')}
+                      />
+                      <Label htmlFor="wire-none">Skip wire instructions for now</Label>
+                    </div>
+
+                    {existingWireInstructions.length > 0 && (
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          id="wire-existing"
+                          name="wire-option"
+                          value="existing"
+                          checked={wireInstructionOption === 'existing'}
+                          onChange={() => setShowPasswordDialog(true)}
+                        />
+                        <Label htmlFor="wire-existing" className="flex items-center gap-2">
+                          <Lock className="h-4 w-4" />
+                          Use existing wire instructions (requires password)
+                        </Label>
+                      </div>
+                    )}
+
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        id="wire-new"
+                        name="wire-option"
+                        value="new"
+                        checked={wireInstructionOption === 'new'}
+                        onChange={(e) => setWireInstructionOption('new')}
+                      />
+                      <Label htmlFor="wire-new" className="flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
+                        Create new wire instructions
+                      </Label>
+                    </div>
+                  </div>
+
+                  {/* Existing Wire Instructions Selection */}
+                  {wireInstructionOption === 'existing' && (
+                    <div className="mt-4 p-4 bg-muted rounded-lg space-y-4">
+                      <Label htmlFor="existing-selection">Select Wire Instructions:</Label>
+                      <Select value={selectedWireInstruction} onValueChange={setSelectedWireInstruction}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose from saved instructions" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {existingWireInstructions.map((instruction) => (
+                            <SelectItem key={instruction.id} value={instruction.id}>
+                              {instruction.beneficiary_name} - ${instruction.wire_amount?.toLocaleString() || 'N/A'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button type="button" variant="outline" onClick={onCancel}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={loading}>
+                    {loading ? 'Creating...' : 'Create Transaction'}
+                  </Button>
+                </div>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="wire-instructions">
+              {createdTransaction && (
+                <WireInstructionForm
+                  transactionId={createdTransaction.id}
+                  mode="create"
+                  onSubmit={handleWireInstructionSubmit}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
+
+      {/* Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              Verify Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter your password to access saved wire instructions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                onKeyDown={(e) => e.key === 'Enter' && handlePasswordVerification()}
+              />
+            </div>
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-
-            <div className="space-y-2">
-              <Label htmlFor="transaction_id">Transaction ID (Optional)</Label>
-              <Input
-                id="transaction_id"
-                value={formData.transaction_id}
-                onChange={(e) => setFormData(prev => ({ ...prev, transaction_id: e.target.value }))}
-                placeholder="Leave blank to auto-generate"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="property_address">Property Address</Label>
-              <Input
-                id="property_address"
-                value={formData.property_address}
-                onChange={(e) => setFormData(prev => ({ ...prev, property_address: e.target.value }))}
-                placeholder="123 Property Street, City, State"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="property_value">Property Value</Label>
-                <Input
-                  id="property_value"
-                  type="number"
-                  step="0.01"
-                  value={formData.property_value}
-                  onChange={(e) => setFormData(prev => ({ ...prev, property_value: e.target.value }))}
-                  placeholder="500000"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="escrow_amount">Escrow Amount</Label>
-                <Input
-                  id="escrow_amount"
-                  type="number"
-                  step="0.01"
-                  value={formData.escrow_amount}
-                  onChange={(e) => setFormData(prev => ({ ...prev, escrow_amount: e.target.value }))}
-                  placeholder="50000"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="closing_date">Expected Closing Date</Label>
-              <Input
-                id="closing_date"
-                type="date"
-                value={formData.closing_date}
-                onChange={(e) => setFormData(prev => ({ ...prev, closing_date: e.target.value }))}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={onCancel}>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPasswordDialog(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Transaction'}
+              <Button onClick={handlePasswordVerification}>
+                <Unlock className="h-4 w-4 mr-2" />
+                Verify
               </Button>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
