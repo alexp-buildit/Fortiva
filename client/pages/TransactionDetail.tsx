@@ -343,30 +343,103 @@ export default function TransactionDetail() {
           </div>
 
           {/* Quick Stats */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Participant Summary
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600">{senders.length}</p>
-                  <p className="text-sm text-muted-foreground">Senders</p>
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Participant Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">{senders.length}</p>
+                    <p className="text-sm text-muted-foreground">Senders</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">{receivers.length}</p>
+                    <p className="text-sm text-muted-foreground">Receivers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600">{escrowAgents.length}</p>
+                    <p className="text-sm text-muted-foreground">Escrow Agents</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600">{receivers.length}</p>
-                  <p className="text-sm text-muted-foreground">Receivers</p>
+              </CardContent>
+            </Card>
+
+            {/* Wire Instructions Quick Access */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="h-5 w-5" />
+                  Wire Instructions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">{wireInstructions.length}</p>
+                      <p className="text-sm text-muted-foreground">Total Instructions</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-600">
+                        {wireInstructions.filter(w => w.status === 'approved').length}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Approved</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-yellow-600">
+                        {wireInstructions.filter(w => w.status === 'pending').length}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Pending</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {wireInstructions.length > 0 ? (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setActiveTab('wire-instructions');
+                            // Small delay to ensure tab is switched before scrolling
+                            setTimeout(() => {
+                              document.getElementById('wire-instructions')?.scrollIntoView({ behavior: 'smooth' });
+                            }, 100);
+                          }}
+                          className="flex-1"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+                          className="flex-1"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Add
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+                        className="w-full"
+                        size="sm"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Wire Instructions
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-purple-600">{escrowAgents.length}</p>
-                  <p className="text-sm text-muted-foreground">Escrow Agents</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Participants Tab */}
@@ -472,10 +545,19 @@ export default function TransactionDetail() {
         <TabsContent value="wire-instructions" className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Wire Instructions</h3>
-            <Button onClick={() => navigate(`/wire-instructions/${transaction.id}`)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Wire Instructions
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                View All
+              </Button>
+              <Button onClick={() => navigate(`/wire-instructions/${transaction.id}`)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add New
+              </Button>
+            </div>
           </div>
 
           {wireInstructions.length === 0 ? (
@@ -486,69 +568,172 @@ export default function TransactionDetail() {
                 <p className="text-muted-foreground mb-6">
                   No wire instructions have been created for this transaction yet.
                 </p>
-                <Button onClick={() => navigate(`/wire-instructions/${transaction.id}`)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Wire Instructions
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button onClick={() => navigate(`/wire-instructions/${transaction.id}`)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create New Wire Instructions
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/wire-instructions')}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Browse Existing Instructions
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-4">
-              {wireInstructions.map((instruction) => (
-                <Card key={instruction.id}>
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Shield className="h-5 w-5 text-primary" />
+              {/* Summary Card */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-green-600">
+                      <CheckCircle2 className="h-5 w-5" />
+                      Wire Instructions Available ({wireInstructions.length})
+                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View & Manage All
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Another
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-600">
+                        {wireInstructions.filter(w => w.status === 'approved').length}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Approved</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-600">
+                        {wireInstructions.filter(w => w.status === 'verified').length}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Verified</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-yellow-600">
+                        {wireInstructions.filter(w => w.status === 'pending').length}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Pending</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">
+                        ${wireInstructions.reduce((sum, w) => sum + w.wire_amount, 0).toLocaleString()}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Total Amount</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Recent Wire Instructions Preview */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-muted-foreground">Recent Instructions</h4>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+                  >
+                    View All {wireInstructions.length} →
+                  </Button>
+                </div>
+
+                {wireInstructions.slice(0, 3).map((instruction) => (
+                  <Card key={instruction.id} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Shield className="h-5 w-5 text-primary" />
+                          <div>
+                            <CardTitle className="text-base">{instruction.beneficiary_name}</CardTitle>
+                            <CardDescription className="text-xs">
+                              Created {new Date(instruction.created_at).toLocaleDateString()}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getWireStatusColor(instruction.status)} variant="secondary">
+                            {instruction.status.charAt(0).toUpperCase() + instruction.status.slice(1)}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div>
-                          <CardTitle className="text-lg">{instruction.beneficiary_name}</CardTitle>
-                          <CardDescription>
-                            Created {new Date(instruction.created_at).toLocaleDateString()}
-                          </CardDescription>
+                          <p className="font-medium text-muted-foreground">Amount</p>
+                          <p className="font-semibold text-lg">
+                            ${instruction.wire_amount.toLocaleString()}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Bank</p>
+                          <div className="flex items-center gap-1">
+                            <Building className="h-3 w-3" />
+                            <span>{instruction.bank_name}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <p className="font-medium text-muted-foreground">Verification</p>
+                          <p className="capitalize">{instruction.verification_method}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getWireStatusColor(instruction.status)}>
-                          {instruction.status.charAt(0).toUpperCase() + instruction.status.slice(1)}
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Amount</p>
-                        <p className="text-lg font-semibold">
-                          ${instruction.wire_amount.toLocaleString()}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Bank</p>
-                        <div className="flex items-center gap-1">
-                          <Building className="h-4 w-4" />
-                          <span className="text-sm">{instruction.bank_name}</span>
+                      {instruction.purpose_of_wire && (
+                        <div className="mt-3 pt-3 border-t">
+                          <p className="text-xs font-medium text-muted-foreground">Purpose</p>
+                          <p className="text-sm text-ellipsis overflow-hidden">
+                            {instruction.purpose_of_wire.length > 100
+                              ? `${instruction.purpose_of_wire.substring(0, 100)}...`
+                              : instruction.purpose_of_wire
+                            }
+                          </p>
                         </div>
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">Verification</p>
-                        <p className="text-sm capitalize">{instruction.verification_method}</p>
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <p className="text-sm font-medium text-muted-foreground">Purpose</p>
-                      <p className="text-sm">{instruction.purpose_of_wire}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+
+                {wireInstructions.length > 3 && (
+                  <Card className="border-dashed">
+                    <CardContent className="text-center py-8">
+                      <p className="text-muted-foreground mb-4">
+                        {wireInstructions.length - 3} more wire instructions available
+                      </p>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate(`/wire-instructions/${transaction.id}`)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View All {wireInstructions.length} Instructions
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </div>
           )}
         </TabsContent>
