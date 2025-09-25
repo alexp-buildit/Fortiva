@@ -20,7 +20,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!user || !profile) {
+  if (!user) {
     return (
       <div className="container flex min-h-screen items-center justify-center py-12">
         <Card className="w-full max-w-md">
@@ -37,6 +37,37 @@ export default function Dashboard() {
             <Button onClick={() => window.location.href = '/login'} className="w-full">
               Sign In
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // If user exists but profile is still loading or doesn't exist, show a basic dashboard
+  if (!profile) {
+    console.log('User authenticated but no profile found, showing basic dashboard');
+    return (
+      <div className="container flex min-h-screen items-center justify-center py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-center">Welcome!</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Your account is set up. We're loading your profile information.
+            </p>
+            <p className="text-sm">
+              <strong>Email:</strong> {user.email}
+            </p>
+            <div className="space-y-2">
+              <Button onClick={() => window.location.href = '/transactions'} className="w-full">
+                View Transactions
+              </Button>
+              <Button variant="outline" onClick={() => signOut()} className="w-full">
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

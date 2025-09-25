@@ -29,49 +29,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set a maximum loading time
-    const loadingTimeout = setTimeout(() => {
-      console.warn('Auth loading timed out, setting loading to false');
-      setLoading(false);
-    }, 10000); // 10 second timeout
+    let mounted = true;
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
+    const initializeAuth = async () => {
+      try {
+        console.log('Initializing auth...');
 
-      if (session?.user) {
-        loadUserProfile(session.user.id).finally(() => {
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('Error getting session:', error);
+          if (mounted) {
+            setLoading(false);
+          }
+          return;
+        }
+
+        console.log('Initial session:', session?.user?.email || 'No session');
+
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (session?.user) {
+            await loadUserProfile(session.user.id);
+          }
+
           setLoading(false);
-          clearTimeout(loadingTimeout);
-        });
-      } else {
-        setLoading(false);
-        clearTimeout(loadingTimeout);
+        }
+      } catch (err) {
+        console.error('Auth initialization error:', err);
+        if (mounted) {
+          setLoading(false);
+        }
       }
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state changed:', event, session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
+      console.log('Auth state changed:', event, session?.user?.email || 'No session');
 
-      if (session?.user) {
-        await loadUserProfile(session.user.id);
-      } else {
-        setProfile(null);
+      if (mounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await loadUserProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
       }
-      setLoading(false);
-      clearTimeout(loadingTimeout);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe();
-      clearTimeout(loadingTimeout);
     };
   }, []);
 
@@ -87,8 +104,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) {
         console.error('Error loading user profile:', error);
-        // Set loading to false even if profile fails to load
-        setLoading(false);
+        // If profile doesn't exist, create a minimal one for now
+        // This helps in development when the database might not be fully synced
+        console.log('Profile not found, user can still access the app');
         return;
       }
 

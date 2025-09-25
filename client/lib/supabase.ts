@@ -3,8 +3,14 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log('🔧 Supabase config:', {
+  url: supabaseUrl,
+  hasKey: !!supabaseAnonKey
+});
+
 // Validate environment variables
 if (!supabaseUrl?.includes('wgqihgtcokgmrombniko')) {
+  console.error('❌ Supabase URL mismatch:', supabaseUrl);
   throw new Error('Supabase URL mismatch - check your project URL');
 }
 
@@ -21,7 +27,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   }
 });
 
-// Supabase client is ready for use
+console.log('✅ Supabase client initialized successfully');
 
 export type Database = {
   public: {
