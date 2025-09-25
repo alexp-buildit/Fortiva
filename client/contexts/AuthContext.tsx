@@ -29,20 +29,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Set a maximum loading time
+    const loadingTimeout = setTimeout(() => {
+      console.warn('Auth loading timed out, setting loading to false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
+
       if (session?.user) {
-        loadUserProfile(session.user.id);
+        loadUserProfile(session.user.id).finally(() => {
+          setLoading(false);
+          clearTimeout(loadingTimeout);
+        });
+      } else {
+        setLoading(false);
+        clearTimeout(loadingTimeout);
       }
-      setLoading(false);
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event, session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
 
@@ -52,20 +66,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(null);
       }
       setLoading(false);
+      clearTimeout(loadingTimeout);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(loadingTimeout);
+    };
   }, []);
 
   const loadUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      console.log('Loading user profile for:', userId);
 
-    if (!error && data) {
-      setProfile(data);
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error loading user profile:', error);
+        // Set loading to false even if profile fails to load
+        setLoading(false);
+        return;
+      }
+
+      if (data) {
+        console.log('User profile loaded:', data);
+        setProfile(data);
+      } else {
+        console.warn('No profile data found for user:', userId);
+      }
+    } catch (err: any) {
+      console.error('Profile loading error:', err);
     }
   };
 
@@ -110,8 +144,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (!error) {
+        // Clear local state immediately
+        setUser(null);
+        setProfile(null);
+        setSession(null);
+
+        // Navigate to login page
+        window.location.href = '/login';
+      }
+
+      return { error };
+    } catch (err: any) {
+      console.error('Sign out error:', err);
+      return { error: err };
+    }
   };
 
   const value = {

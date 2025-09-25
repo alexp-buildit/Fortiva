@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,26 +14,40 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { signIn } = useAuth();
+  const { signIn, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // Auto-redirect if user is already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, authLoading, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    const { error } = await signIn(email, password);
+    try {
+      const { error } = await signIn(email, password);
 
-    if (error) {
-      setError(error.message);
-    } else {
-      navigate(from, { replace: true });
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        // Don't immediately navigate - let the useEffect handle it
+        // This gives time for the auth state to update properly
+        console.log('Login successful, waiting for auth state update...');
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'An error occurred during sign in');
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
