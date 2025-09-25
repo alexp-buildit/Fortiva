@@ -3,7 +3,12 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log('🔧 DEBUG: Supabase URL:', supabaseUrl);
+console.log('🔧 DEBUG: Supabase Key exists:', !!supabaseAnonKey);
+console.log('🔧 DEBUG: Key length:', supabaseAnonKey?.length);
+
 if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('❌ Missing env vars:', { supabaseUrl, supabaseAnonKey });
   throw new Error('Missing Supabase environment variables');
 }
 
@@ -14,6 +19,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: true
   }
 });
+
+// Test the connection (using a simple query that doesn't need RLS)
+console.log('🔄 Testing Supabase connection...');
 
 export type Database = {
   public: {

@@ -84,7 +84,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     role: 'admin' | 'sender' | 'receiver';
     username: string;
   }) => {
-    const { error } = await supabase.auth.signUp({
+    console.log('🔄 Attempting signup with:', { email, userData });
+
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -97,6 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       },
     });
+
+    if (error) {
+      console.error('❌ Signup error:', error);
+    } else {
+      console.log('✅ Signup successful:', data);
+    }
+
     return { error };
   };
 
